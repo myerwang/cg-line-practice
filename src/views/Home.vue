@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div id="force"></div>
+    <div id="force" class="force"></div>
     <div id="touches"></div>
     <canvas>Sorry, your browser is too old for this demo.</canvas>
   </div>
@@ -182,7 +182,6 @@ body {
   height: 100%;
   font-family: sans-serif;
   font-size: 13px;
-  padding: 1em;
   box-sizing: border-box;
 }
 canvas {
@@ -191,6 +190,10 @@ canvas {
   height: 100%;
   left: 0;
   top: 0;
+  z-index: 10;
+}
+.force{
+  padding-top:100px;
 }
 </style>
 

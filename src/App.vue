@@ -18,8 +18,13 @@
 }
 
 #nav {
-  padding: 30px;
-
+  height:40px;
+  line-height: 40px;
+  background-color: #aaaaaa;
+  position: absolute;
+  z-index: 100;
+  width: 100%;
+  user-select: none;
   a {
     font-weight: bold;
     color: #2c3e50;
