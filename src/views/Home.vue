@@ -1,7 +1,7 @@
 <template>
   <div>
     <div id="force" class="force"></div>
-    <div id="touches"></div>
+    <div id="touches" class="touches"></div>
     <canvas>Sorry, your browser is too old for this demo.</canvas>
   </div>
 </template>
@@ -118,13 +118,6 @@ export default {
                 altitudeAngle = ${touch.altitudeAngle} <br/>
                 azimuthAngle = ${touch.azimuthAngle} <br/>
               `
-
-              // 'touchev = ' + (e.touches ? JSON.stringify(
-              //   ['force', 'radiusX', 'radiusY', 'rotationAngle', 'altitudeAngle', 'azimuthAngle', 'touchType'].reduce((o, key) => {
-              //     o[key] = e.touches[0][key]
-              //     return o
-              //   }, {})
-              // , null, 2) : '')
             }
           })
         })
@@ -193,7 +186,20 @@ canvas {
   z-index: 10;
 }
 .force{
+  position: absolute;
+  width: 100%;
   padding-top:100px;
+  z-index: 100;
+  pointer-events: none;
+  color:red
+}
+.touches{
+  position: absolute;
+  width: 100%;
+  z-index: 100;
+  padding-top:120px;
+  pointer-events: none;
+  color:blue
 }
 </style>
 
