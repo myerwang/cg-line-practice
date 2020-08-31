@@ -1,2 +1,0 @@
-(window["webpackJsonp"]=window["webpackJsonp"]||[]).push([["about"],{5795:function(t,n,e){"use strict";var u=e("6868"),a=e.n(u);a.a},6868:function(t,n,e){},f820:function(t,n,e){"use strict";e.r(n);var u=function(){var t=this,n=t.$createElement;t._self._c;return t._m(0)},a=[function(){var t=this,n=t.$createElement,e=t._self._c||n;return e("div",{staticClass:"about"},[e("h1",[t._v("CG线条练习工具开发中/意见建议请联系QQ8996111")])])}],c=(e("5795"),e("2877")),s={},r=Object(c["a"])(s,u,a,!1,null,null,null);n["default"]=r.exports}}]);
-//# sourceMappingURL=about.19008bc9.js.map
