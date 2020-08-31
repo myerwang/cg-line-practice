@@ -2,7 +2,8 @@
   <div>
     <div class="force">{{this.pressure}}</div>
     <div class="touches" v-html="this.touches"></div>
-    <canvas v-plug>Sorry, your browser is too old for this demo.</canvas>
+    <div class="clear" @click="clearCanvas"></div>
+    <canvas ref="myCanvas" v-plug>Sorry, your browser is too old for this demo.</canvas>
   </div>
 </template>
 
@@ -18,7 +19,15 @@ export default {
     components: {
     },
     methods: {
-
+      clearCanvas:function(){  
+        const c = this.$refs.myCanvas
+        const context = c.getContext("2d")
+          
+        context.fillStyle="#ffffff"
+        context.beginPath()
+        context.fillRect(0,0,c.width,c.height)
+        context.closePath()
+      }  
     },
     mounted () {
 
@@ -69,7 +78,6 @@ export default {
 
               points.push({ x, y, lineWidth })
             
-              console.log("!!!!!!!!!!!!!!!!!!!!!!!")
             })
           } //for
 
@@ -163,11 +171,17 @@ export default {
                 context.stroke()
               }
 
+              console.log(points)
+              console.log("!!!!!!!!!!!!!!!!!!!!!!!")
+
               points = []
               lineWidth = 0
             })
           } //for
+
+
           
+
         } //bind
       }
     }
@@ -212,6 +226,16 @@ canvas {
   padding-top:120px;
   pointer-events: none;
   color:blue
+}
+.clear{
+  position: absolute;
+  left:50px;
+  top:90px;
+  z-index: 100;
+  background-color: red;
+  width: 50px;
+  height:50px;
+  border-radius: 50%;
 }
 </style>
 
