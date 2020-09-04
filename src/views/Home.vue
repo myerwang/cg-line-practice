@@ -5,7 +5,6 @@
     <div></div>
     <div class="force">{{this.pressure}}</div>
     <div class="touches" v-html="this.touches"></div>
-    <div class="clear" @click="clearCanvas"></div>
     <canvas ref="myCanvas" v-plug>Sorry, your browser is too old for this demo.</canvas>
   </div>
 </template>
@@ -280,16 +279,6 @@ canvas {
   padding-top:120px;
   pointer-events: none;
   color:blue
-}
-.clear{
-  position: absolute;
-  left:50px;
-  top:90px;
-  z-index: 100;
-  background-color: red;
-  width: 50px;
-  height:50px;
-  border-radius: 50%;
 }
 .point{
   position: absolute;
