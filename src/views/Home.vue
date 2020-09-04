@@ -1,5 +1,8 @@
 <template>
   <div>
+    <div ref="p1" :style="p1" class="point"></div>
+    <div ref="p2" :style="p2" class="point"></div>
+    <div></div>
     <div class="force">{{this.pressure}}</div>
     <div class="touches" v-html="this.touches"></div>
     <div class="clear" @click="clearCanvas"></div>
@@ -12,8 +15,24 @@
 export default {
     data() {
       return {
-        pressure:0,
-        touches:""
+        pressure:0,          //笔压力
+        touches:"",          //笔属性文字展示
+        development:true,    //是否为开发模式，开发模式下响应鼠标绘画
+        p1:{
+          left:0,
+          top:0,
+          width:"30px",
+          height:"30px"
+        },//p1点style
+        p2:{
+          left:0,
+          top:0,
+          width:"30px",
+          height:"30px"
+        },//p2点style
+
+
+
       }
     },
     components: {
@@ -27,10 +46,28 @@ export default {
         context.beginPath()
         context.fillRect(0,0,c.width,c.height)
         context.closePath()
-      }  
+      },//清除画布
+      posePoint:function(){
+
+        const minH = Math.round(window.innerHeight/10)
+        const maxH = Math.round(window.innerHeight - minH)
+        const minW = Math.round(window.innerWidth/10)
+        const maxW = Math.round(window.innerWidth - minW)
+
+        console.log("minH:" + minH + " maxH:" + maxH + " minW:"+minW +" maxW:"+maxW)
+
+        this.p1.top = minH + Math.round(Math.random() * (maxH - minH)) + "px"
+        this.p1.left = minW + Math.round(Math.random() * (maxW - minW)) + "px"
+        this.p2.top = minH + Math.round(Math.random() * (maxH - minH)) + "px"
+        this.p2.left = minW + Math.round(Math.random() * (maxW - minW)) + "px"
+        
+      },//随机摆放点位置 
+
+
+
     },
     mounted () {
-
+      this.posePoint()
     },
     watch:{
 
@@ -40,6 +77,7 @@ export default {
         bind(el, binding, vnode) {
 
           const context = el.getContext('2d')
+          const that = vnode.context
           let lineWidth = 0
           let isMousedown = false
           let points = []
@@ -47,9 +85,14 @@ export default {
           el.width = window.innerWidth * 2
           el.height = window.innerHeight * 2
 
+          console.log("el.width" + el.width + " el.height" + el.height)
+
           const requestIdleCallback = window.requestIdleCallback || function (fn) { setTimeout(fn, 1) };
 
           for (const ev of ["touchstart", "mousedown"]) {
+
+            if(!that.development && "mousedown" == ev) continue
+            
             el.addEventListener(ev, function (e) {
 
               let pressure = 0.1;
@@ -82,6 +125,9 @@ export default {
           } //for
 
           for (const ev of ['touchmove', 'mousemove']) {
+            
+            if(!that.development && "mousemove" == ev) continue
+            
             el.addEventListener(ev, function (e) {
               if (!isMousedown) return
               e.preventDefault()
@@ -143,6 +189,9 @@ export default {
           } //for
 
           for (const ev of ['touchend', 'touchleave', 'mouseup']) {
+            
+            if(!that.development && "mouseup" == ev) continue
+            
             el.addEventListener(ev, function (e) {
               let pressure = 0.1;
               let x, y;
@@ -176,6 +225,11 @@ export default {
 
               points = []
               lineWidth = 0
+
+              //重置点位置，擦出线
+              that.posePoint()
+              that.clearCanvas()
+
             })
           } //for
 
@@ -235,6 +289,16 @@ canvas {
   background-color: red;
   width: 50px;
   height:50px;
+  border-radius: 50%;
+}
+.point{
+  position: absolute;
+  left:50%;
+  top:50%;
+  z-index:100;
+  background-color: #111111;
+  width:30px;
+  height:30px;
   border-radius: 50%;
 }
 </style>
