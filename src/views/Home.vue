@@ -3,8 +3,8 @@
     <div ref="p1" :style="p1" class="point"></div>
     <div ref="p2" :style="p2" class="point"></div>
     <div></div>
-    <div class="force">{{this.pressure}}</div>
-    <div class="touches" v-html="this.touches"></div>
+    <div v-show="development" class="force">{{this.pressure}}</div>
+    <div v-show="development" class="touches" v-html="this.touches"></div>
     <canvas ref="myCanvas" v-plug>Sorry, your browser is too old for this demo.</canvas>
   </div>
 </template>
@@ -66,7 +66,17 @@ export default {
 
     },
     mounted () {
+
+      //构建两点
       this.posePoint()
+
+      //环境判断
+      if("development" == process.env.NODE_ENV){
+        this.development = true
+      }else{
+        this.development = false
+      }
+
     },
     watch:{
 
