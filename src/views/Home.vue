@@ -2,9 +2,11 @@
   <div>
     <div ref="p1" :style="p1" class="point"></div>
     <div ref="p2" :style="p2" class="point"></div>
-    <div></div>
     <div v-show="development" class="force">{{this.pressure}}</div>
     <div v-show="development" class="touches" v-html="this.touches"></div>
+    <div class="panel">
+      <div class="basic"><span class="icon iconfont iconqianbi"></span></div>
+    </div>
     <canvas ref="myCanvas" v-plug>Sorry, your browser is too old for this demo.</canvas>
   </div>
 </template>
@@ -78,7 +80,7 @@ export default {
       }
 
       console.log("process.env.NODE_ENV:"+process.env.NODE_ENV)
-      
+
     },
     watch:{
 
@@ -301,6 +303,17 @@ canvas {
   width:30px;
   height:30px;
   border-radius: 50%;
+}
+.panel{
+  position: absolute;
+  left:0;
+  top:50%;
+  z-index:150;
+  width: 100px;
+  background-color: rgba(0, 0, 0, .7);
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+  padding:5px;
 }
 </style>
 

@@ -1,0 +1,30 @@
+{
+  "id": "2051562",
+  "name": "line",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "5363694",
+      "name": "排名",
+      "font_class": "paiming",
+      "unicode": "e7da",
+      "unicode_decimal": 59354
+    },
+    {
+      "icon_id": "11399569",
+      "name": "橡皮擦",
+      "font_class": "xiangpica",
+      "unicode": "e638",
+      "unicode_decimal": 58936
+    },
+    {
+      "icon_id": "11641866",
+      "name": "铅笔",
+      "font_class": "qianbi",
+      "unicode": "e61b",
+      "unicode_decimal": 58907
+    }
+  ]
+}
