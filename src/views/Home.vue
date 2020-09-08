@@ -6,6 +6,7 @@
     <div v-show="development" class="touches" v-html="this.touches"></div>
     <div class="panel">
       <div class="basic"><span class="icon iconfont iconqianbi"></span></div>
+      <div class="basic clear" @click="clearCanvas"><span class="icon iconfont iconxiangpica"></span></div>
     </div>
     <canvas ref="myCanvas" v-plug>Sorry, your browser is too old for this demo.</canvas>
   </div>
@@ -47,6 +48,11 @@ export default {
         context.beginPath()
         context.fillRect(0,0,c.width,c.height)
         context.closePath()
+
+        this.$store.commit('clearLineData')
+
+        console.log("clearCanvas!!!!")
+
       },//清除画布
       posePoint:function(){
 
@@ -93,7 +99,6 @@ export default {
           const that = vnode.context
           let lineWidth = 0
           let isMousedown = false
-          let points = []
 
           el.width = window.innerWidth * 2
           el.height = window.innerHeight * 2
@@ -132,7 +137,8 @@ export default {
               context.beginPath()
               context.moveTo(x, y)
 
-              points.push({ x, y, lineWidth })
+              //points.push()
+              that.$store.commit('addLineData',{ x, y, lineWidth })
             
             })
           } //for
@@ -161,7 +167,9 @@ export default {
 
               // smoothen line width
               lineWidth = (Math.log(pressure + 1) * 40 * 0.2 + lineWidth * 0.8)
-              points.push({ x, y, lineWidth })
+
+              //points.push({ x, y, lineWidth })
+              that.$store.commit('addLineData',{ x, y, lineWidth })
 
               context.strokeStyle = 'black'
               context.lineCap = 'round'
@@ -170,12 +178,12 @@ export default {
               // context.lineTo(x, y);
               // context.moveTo(x, y);
 
-              if (points.length >= 3) {
-                const l = points.length - 1
-                const xc = (points[l].x + points[l - 1].x) / 2
-                const yc = (points[l].y + points[l - 1].y) / 2
-                context.lineWidth = points[l - 1].lineWidth
-                context.quadraticCurveTo(points[l - 1].x, points[l - 1].y, xc, yc)
+              if (that.$store.state.points.length >= 3) {
+                const l = that.$store.state.points.length - 1
+                const xc = (that.$store.state.points[l].x + that.$store.state.points[l - 1].x) / 2
+                const yc = (that.$store.state.points[l].y + that.$store.state.points[l - 1].y) / 2
+                context.lineWidth = that.$store.state.points[l - 1].lineWidth
+                context.quadraticCurveTo(that.$store.state.points[l - 1].x, that.$store.state.points[l - 1].y, xc, yc)
                 context.stroke()
                 context.beginPath()
                 context.moveTo(xc, yc)
@@ -227,21 +235,19 @@ export default {
               context.lineCap = 'round'
               context.lineJoin = 'round'
 
-              if (points.length >= 3) {
-                const l = points.length - 1
-                context.quadraticCurveTo(points[l].x, points[l].y, x, y)
+              if (that.$store.state.points.length >= 3) {
+                const l = that.$store.state.points.length - 1
+                context.quadraticCurveTo(that.$store.state.points[l].x, that.$store.state.points[l].y, x, y)
                 context.stroke()
               }
 
-              console.log(points)
+              console.log(that.$store.state.points)
               console.log("!!!!!!!!!!!!!!!!!!!!!!!")
 
-              points = []
               lineWidth = 0
 
               //重置点位置，擦出线
               that.posePoint()
-              that.clearCanvas()
 
             })
           } //for
@@ -313,7 +319,18 @@ canvas {
   background-color: rgba(0, 0, 0, .7);
   border-top-right-radius: 10px;
   border-bottom-right-radius: 10px;
-  padding:5px;
+  .basic{
+    margin: 10px;
+    background-color: #79ff77;
+    border-radius: 10px;
+    span{
+      font-size: 60px;
+      color: #4c4c4c;
+    }
+  }
+  .clear{
+    background-color: #ff7777;
+  }
 }
 </style>
 
