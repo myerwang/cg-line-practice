@@ -6,7 +6,7 @@
     <div v-show="development" class="touches" v-html="this.touches"></div>
     <div class="panel">
       <div class="basic"><span class="icon iconfont iconqianbi"></span></div>
-      <div class="basic clear" @click="clearCanvas"><span class="icon iconfont iconxiangpica"></span></div>
+      <div class="basic clear" @click="clearCanvasAndPoints"><span class="icon iconfont iconxiangpica"></span></div>
     </div>
     <canvas ref="myCanvas" v-plug>Sorry, your browser is too old for this demo.</canvas>
   </div>
@@ -17,6 +17,7 @@
 export default {
     data() {
       return {
+        points:[],
         pressure:0,          //笔压力
         touches:"",          //笔属性文字展示
         development:true,    //是否为开发模式，开发模式下响应鼠标绘画
@@ -41,6 +42,7 @@ export default {
     },
     methods: {
       clearCanvas:function(){  
+
         const c = this.$refs.myCanvas
         const context = c.getContext("2d")
           
@@ -49,11 +51,13 @@ export default {
         context.fillRect(0,0,c.width,c.height)
         context.closePath()
 
+      },//清除画布
+      clearCanvasAndPoints:function(){  
+
+        this.clearCanvas()
         this.$store.commit('clearLineData')
 
-        console.log("clearCanvas!!!!")
-
-      },//清除画布
+      },//清除画布与历史记录
       posePoint:function(){
 
         const minH = Math.round(window.innerHeight/10)
@@ -61,14 +65,66 @@ export default {
         const minW = Math.round(window.innerWidth/10)
         const maxW = Math.round(window.innerWidth - minW)
 
-        console.log("minH:" + minH + " maxH:" + maxH + " minW:"+minW +" maxW:"+maxW)
+        //console.log("minH:" + minH + " maxH:" + maxH + " minW:"+minW +" maxW:"+maxW)
 
         this.p1.top = minH + Math.round(Math.random() * (maxH - minH)) + "px"
         this.p1.left = minW + Math.round(Math.random() * (maxW - minW)) + "px"
         this.p2.top = minH + Math.round(Math.random() * (maxH - minH)) + "px"
         this.p2.left = minW + Math.round(Math.random() * (maxW - minW)) + "px"
         
-      },//随机摆放点位置 
+      },//随机摆放点位置
+      strokePoints:function(step){
+        const c = this.$refs.myCanvas
+        const context = c.getContext("2d")
+        let configShowLineLast = 0
+        let color = 'rgba(0,0,0,1)'
+        if(step){
+          configShowLineLast = parseInt(this.$store.state.configShowLineLast)
+        }
+console.log(this.$store.state.points)
+        for (const key in this.$store.state.points) {
+          if (this.$store.state.points.hasOwnProperty(key)) {
+            const element = this.$store.state.points[key]
+
+            if(configShowLineLast < key) break
+            color = 'rgba(0,0,0,1)'
+
+            for (const keySon in element) {
+              if (element.hasOwnProperty(keySon)) {
+                const elementSon = element[keySon];
+
+                if(0 == keySon){
+                  context.lineWidth = elementSon.lineWidth
+                  context.strokeStyle = color
+                  context.lineCap = 'round'
+                  context.lineJoin = 'round'
+                  context.beginPath()
+                  context.moveTo(elementSon.x, elementSon.y)
+                }
+
+                if (keySon >= 3) {
+                  const l = keySon - 1
+                  const xc = (element[l].x + element[l - 1].x) / 2
+                  const yc = (element[l].y + element[l - 1].y) / 2
+                  context.lineWidth = element[l - 1].lineWidth
+                  context.quadraticCurveTo(element[l - 1].x, element[l - 1].y, xc, yc)
+                  context.stroke()
+                  context.beginPath()
+                  context.moveTo(xc, yc)
+                }
+
+                
+              }
+
+
+            }
+
+            
+
+          }
+        }
+
+      },//重绘数组内线段
 
 
 
@@ -89,7 +145,10 @@ export default {
 
     },
     watch:{
-
+      '$store.state.points':function(){
+        //重绘
+        this.strokePoints(true)
+      },//触发重绘
     },
     directives:{
       plug:{
@@ -103,7 +162,7 @@ export default {
           el.width = window.innerWidth * 2
           el.height = window.innerHeight * 2
 
-          console.log("el.width" + el.width + " el.height" + el.height)
+          //console.log("el.width" + el.width + " el.height" + el.height)
 
           const requestIdleCallback = window.requestIdleCallback || function (fn) { setTimeout(fn, 1) };
 
@@ -137,8 +196,8 @@ export default {
               context.beginPath()
               context.moveTo(x, y)
 
-              //points.push()
-              that.$store.commit('addLineData',{ x, y, lineWidth })
+              that.points.push()
+              //that.$store.commit('addLineData',{ x, y, lineWidth })
             
             })
           } //for
@@ -168,8 +227,7 @@ export default {
               // smoothen line width
               lineWidth = (Math.log(pressure + 1) * 40 * 0.2 + lineWidth * 0.8)
 
-              //points.push({ x, y, lineWidth })
-              that.$store.commit('addLineData',{ x, y, lineWidth })
+              that.points.push({ x, y, lineWidth })
 
               context.strokeStyle = 'black'
               context.lineCap = 'round'
@@ -178,12 +236,12 @@ export default {
               // context.lineTo(x, y);
               // context.moveTo(x, y);
 
-              if (that.$store.state.points.length >= 3) {
-                const l = that.$store.state.points.length - 1
-                const xc = (that.$store.state.points[l].x + that.$store.state.points[l - 1].x) / 2
-                const yc = (that.$store.state.points[l].y + that.$store.state.points[l - 1].y) / 2
-                context.lineWidth = that.$store.state.points[l - 1].lineWidth
-                context.quadraticCurveTo(that.$store.state.points[l - 1].x, that.$store.state.points[l - 1].y, xc, yc)
+              if (that.points.length >= 3) {
+                const l = that.points.length - 1
+                const xc = (that.points[l].x + that.points[l - 1].x) / 2
+                const yc = (that.points[l].y + that.points[l - 1].y) / 2
+                context.lineWidth = that.points[l - 1].lineWidth
+                context.quadraticCurveTo(that.points[l - 1].x, that.points[l - 1].y, xc, yc)
                 context.stroke()
                 context.beginPath()
                 context.moveTo(xc, yc)
@@ -235,19 +293,29 @@ export default {
               context.lineCap = 'round'
               context.lineJoin = 'round'
 
-              if (that.$store.state.points.length >= 3) {
-                const l = that.$store.state.points.length - 1
-                context.quadraticCurveTo(that.$store.state.points[l].x, that.$store.state.points[l].y, x, y)
+              if (that.points.length >= 3) {
+                const l = that.points.length - 1
+                context.quadraticCurveTo(that.points[l].x, that.points[l].y, x, y)
                 context.stroke()
               }
 
-              console.log(that.$store.state.points)
-              console.log("!!!!!!!!!!!!!!!!!!!!!!!")
+              that.points.push({ x, y, lineWidth })
+
+              //console.log(that.points)
+              //console.log("!!!!!!!!!!!!!!!!!!!!!!!")
 
               lineWidth = 0
 
               //重置点位置，擦出线
               that.posePoint()
+              //清除画布
+              that.clearCanvas()
+              //保存点集合
+              that.$store.commit('addLineData',that.points)
+              //删除本地点集合
+              that.points = []
+              
+              //console.log(that.$store.state.points)
 
             })
           } //for
