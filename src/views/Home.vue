@@ -77,17 +77,16 @@ export default {
         const c = this.$refs.myCanvas
         const context = c.getContext("2d")
         let configShowLineLast = 0
-        let color = 'rgba(0,0,0,1)'
+        let colors = ["#000000","#666666","#CCCCCC"]
         if(step){
           configShowLineLast = parseInt(this.$store.state.configShowLineLast)
         }
-console.log(this.$store.state.points)
         for (const key in this.$store.state.points) {
           if (this.$store.state.points.hasOwnProperty(key)) {
             const element = this.$store.state.points[key]
 
-            if(configShowLineLast < key) break
-            color = 'rgba(0,0,0,1)'
+            if(configShowLineLast <= key) break
+            let color = colors[key]
 
             for (const keySon in element) {
               if (element.hasOwnProperty(keySon)) {
@@ -116,10 +115,7 @@ console.log(this.$store.state.points)
                 
               }
 
-
             }
-
-            
 
           }
         }
