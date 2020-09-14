@@ -5,7 +5,10 @@
     <div v-show="development" class="force">{{this.pressure}}</div>
     <div v-show="development" class="touches" v-html="this.touches"></div>
     <div class="panel">
-      <div class="basic"><span class="icon iconfont iconqianbi"></span></div>
+      <div class="basic match"><span class="icon iconfont iconqianbi"></span></div>
+      <div class="basic fullscreen" v-show="!isFullscreen" @click="fullscreen"><span class="icon iconfont iconquanping"></span></div>
+      <div class="basic fullscreen" v-show="isFullscreen" @click="fullscreen"><span class="icon iconfont iconquxiaoquanping"></span></div>
+      <div class="basic"><span :style="{fontSize:showSumFontSize}">{{showSum}}</span></div>
       <div class="basic clear" @click="clearCanvasAndPoints"><span class="icon iconfont iconxiangpica"></span></div>
     </div>
     <canvas ref="myCanvas" v-plug>Sorry, your browser is too old for this demo.</canvas>
@@ -13,6 +16,8 @@
 </template>
 
 <script>
+
+import screenfull from 'screenfull'
 
 export default {
     data() {
@@ -33,12 +38,25 @@ export default {
           width:"30px",
           height:"30px"
         },//p2点style
+        isFullscreen: false,
 
 
 
       }
     },
     components: {
+    },
+    computed:{
+      showSum(){
+        return this.$store.state.points.length
+      },//显示总分
+      showSumFontSize(){
+        if(this.$store.state.points.length >= 100000) return "14px"
+        if(this.$store.state.points.length >= 10000) return "25px"
+        if(this.$store.state.points.length >= 1000) return "30px"
+        if(this.$store.state.points.length >= 100) return "44px"
+        return "60px"
+      },//总分文字大小
     },
     methods: {
       clearCanvas:function(){  
@@ -121,6 +139,21 @@ export default {
         }
 
       },//重绘数组内线段
+      fullscreen(){
+        if (!screenfull.isEnabled) {
+          this.$message({
+            message: 'you browser can not work',
+            type: 'warning'
+          })
+          return false
+        }
+        screenfull.toggle()
+        if(!screenfull.isFullscreen){
+          this.isFullscreen = true
+        }else{
+          this.isFullscreen = false
+        }
+      },//全屏
 
 
 
@@ -377,7 +410,7 @@ canvas {
 .panel{
   position: absolute;
   left:0;
-  top:50%;
+  top:20%;
   z-index:150;
   width: 100px;
   background-color: rgba(0, 0, 0, .7);
@@ -385,12 +418,17 @@ canvas {
   border-bottom-right-radius: 10px;
   .basic{
     margin: 10px;
-    background-color: #79ff77;
+    background-color: #ffffff;
     border-radius: 10px;
+    height: 80px;
+    line-height: 80px;
     span{
       font-size: 60px;
       color: #4c4c4c;
     }
+  }
+  .match{
+    background-color: #79ff77;
   }
   .clear{
     background-color: #ff7777;
