@@ -35,4 +35,9 @@
     }
   }
 }
+
+.silent{
+  pointer-events: none;
+  touch-action: none;
+}
 </style>

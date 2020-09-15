@@ -8,10 +8,10 @@
       <div class="basic match"><span class="icon iconfont iconqianbi"></span></div>
       <div class="basic fullscreen" v-show="!isFullscreen" @click="fullscreen"><span class="icon iconfont iconquanping"></span></div>
       <div class="basic fullscreen" v-show="isFullscreen" @click="fullscreen"><span class="icon iconfont iconquxiaoquanping"></span></div>
-      <div class="basic"><span :style="{fontSize:showSumFontSize}">{{showSum}}</span></div>
+      <div class="basic silent"><span :style="{fontSize:showSumFontSize}">{{showSum}}</span></div>
       <div class="basic clear" @click="clearCanvasAndPoints"><span class="icon iconfont iconxiangpica"></span></div>
     </div>
-    <canvas ref="myCanvas" v-plug>Sorry, your browser is too old for this demo.</canvas>
+    <canvas ref="myCanvas" v-if="hackReset" v-plug>Sorry, your browser is too old for this demo.</canvas>
   </div>
 </template>
 
@@ -39,6 +39,7 @@ export default {
           height:"30px"
         },//p2点style
         isFullscreen: false,
+        hackReset:true,         //重载组件
 
 
 
@@ -153,7 +154,16 @@ export default {
         }else{
           this.isFullscreen = false
         }
+        this.rebuileCanvas()  //重载组件
       },//全屏
+      rebuileCanvas() {
+        // 销毁子标签
+        this.hackReset = false
+        // 重新创建子标签
+        this.$nextTick(() => {
+          this.hackReset = true
+        })
+      },//重载组件
 
 
 
@@ -416,6 +426,7 @@ canvas {
   background-color: rgba(0, 0, 0, .7);
   border-top-right-radius: 10px;
   border-bottom-right-radius: 10px;
+  touch-action: none;
   .basic{
     margin: 10px;
     background-color: #ffffff;
