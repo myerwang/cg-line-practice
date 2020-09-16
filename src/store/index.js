@@ -8,6 +8,7 @@ export default new Vuex.Store({
   state: {
     points:[],
     passed:0,                           //及格线
+    pointSize:30,                       //点大小
     configShowLineLast:3,               //配置项，保留最后三条线
 
 

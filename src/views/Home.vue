@@ -153,6 +153,31 @@ export default {
           this.hackReset = true
         })
       },//重载组件
+      passedCheck(){
+        
+        for (const key in this.$store.state.points[0]) {
+
+          //比对第一个点
+          let p1xS = parseInt(this.p1.top)*2
+          let p1xE = parseInt(this.p1.top)*2 + this.$store.state.pointSize
+
+          let p1yS = parseInt(this.p1.left)*2
+          let p1yE = parseInt(this.p1.left)*2 + this.$store.state.pointSize
+
+          //比对第二个点
+          let p2xS = parseInt(this.p2.top)*2
+          let p2xE = parseInt(this.p2.top)*2 + this.$store.state.pointSize
+
+          let p2yS = parseInt(this.p2.left)*2
+          let p2yE = parseInt(this.p2.left)*2 + this.$store.state.pointSize
+
+
+          console.log(this.$store.state.points[0][key].x)
+        }
+
+        //重置点位置，擦出线
+        this.posePoint()
+      },//判断坐标是否穿过
 
 
 
@@ -342,8 +367,8 @@ export default {
 
               lineWidth = 0
 
-              //重置点位置，擦出线
-              that.posePoint()
+              //判别准确性
+              that.passedCheck()
               //清除画布
               that.clearCanvas()
               //保存点集合
