@@ -7,6 +7,7 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     points:[],
+    passed:0,                           //及格线
     configShowLineLast:3,               //配置项，保留最后三条线
 
 
@@ -20,6 +21,7 @@ export default new Vuex.Store({
     //清空画布点数据
     clearLineData(state){
       state.points = []
+      state.passed = 0
     }
   },
   // actions  调用方式 this.$store.dispatch('clearLineData',data)

@@ -5,10 +5,8 @@
     <div v-show="development" class="force">{{this.pressure}}</div>
     <div v-show="development" class="touches" v-html="this.touches"></div>
     <div class="panel">
-      <div class="basic match"><span class="icon iconfont iconqianbi"></span></div>
-      <div class="basic fullscreen" v-show="!isFullscreen" @click="fullscreen"><span class="icon iconfont iconquanping"></span></div>
-      <div class="basic fullscreen" v-show="isFullscreen" @click="fullscreen"><span class="icon iconfont iconquxiaoquanping"></span></div>
       <div class="basic silent"><span :style="{fontSize:showSumFontSize}">{{showSum}}</span></div>
+      <div class="basic silent"><span :style="{fontSize:showSumFontSizePassed}">{{this.$store.state.passed}}</span></div>
       <div class="basic clear" @click="clearCanvasAndPoints"><span class="icon iconfont iconxiangpica"></span></div>
     </div>
     <canvas ref="myCanvas" v-if="hackReset" v-plug>Sorry, your browser is too old for this demo.</canvas>
@@ -16,8 +14,6 @@
 </template>
 
 <script>
-
-import screenfull from 'screenfull'
 
 export default {
     data() {
@@ -58,6 +54,13 @@ export default {
         if(this.$store.state.points.length >= 100) return "44px"
         return "60px"
       },//总分文字大小
+      showSumFontSizePassed(){
+        if(this.$store.state.passed >= 100000) return "14px"
+        if(this.$store.state.passed >= 10000) return "25px"
+        if(this.$store.state.passed >= 1000) return "30px"
+        if(this.$store.state.passed >= 100) return "44px"
+        return "60px"
+      },
     },
     methods: {
       clearCanvas:function(){  
@@ -90,6 +93,8 @@ export default {
         this.p1.left = minW + Math.round(Math.random() * (maxW - minW)) + "px"
         this.p2.top = minH + Math.round(Math.random() * (maxH - minH)) + "px"
         this.p2.left = minW + Math.round(Math.random() * (maxW - minW)) + "px"
+
+        console.log("p1.top:" +  parseInt(this.p1.top)*2  + "  p1.left" + parseInt(this.p1.left)*2 + " p2.top:" +  parseInt(this.p2.top)*2  + "  p2.left" + parseInt(this.p2.left)*2)
         
       },//随机摆放点位置
       strokePoints:function(step){
@@ -140,22 +145,6 @@ export default {
         }
 
       },//重绘数组内线段
-      fullscreen(){
-        if (!screenfull.isEnabled) {
-          this.$message({
-            message: 'you browser can not work',
-            type: 'warning'
-          })
-          return false
-        }
-        screenfull.toggle()
-        if(!screenfull.isFullscreen){
-          this.isFullscreen = true
-        }else{
-          this.isFullscreen = false
-        }
-        this.rebuileCanvas()  //重载组件
-      },//全屏
       rebuileCanvas() {
         // 销毁子标签
         this.hackReset = false
@@ -178,6 +167,14 @@ export default {
         this.development = true
       }else{
         this.development = false
+      }
+
+      //开始拉伸窗口事件
+      const that = this;
+      window.onresize = () => {
+        return (() => {
+          this.rebuileCanvas()
+        })()
       }
 
       console.log("process.env.NODE_ENV:"+process.env.NODE_ENV)
@@ -207,7 +204,7 @@ export default {
 
           for (const ev of ["touchstart", "mousedown"]) {
 
-            if(!that.development && "mousedown" == ev) continue
+            if("development" != process.env.NODE_ENV && "mousedown" == ev) continue
             
             el.addEventListener(ev, function (e) {
 
@@ -243,7 +240,7 @@ export default {
 
           for (const ev of ['touchmove', 'mousemove']) {
             
-            if(!that.development && "mousemove" == ev) continue
+            if("development" != process.env.NODE_ENV && "mousedown" == ev) continue
             
             el.addEventListener(ev, function (e) {
               if (!isMousedown) return
@@ -308,7 +305,7 @@ export default {
 
           for (const ev of ['touchend', 'touchleave', 'mouseup']) {
             
-            if(!that.development && "mouseup" == ev) continue
+            if("development" != process.env.NODE_ENV && "mousedown" == ev) continue
             
             el.addEventListener(ev, function (e) {
               let pressure = 0.1;
@@ -354,7 +351,8 @@ export default {
               //删除本地点集合
               that.points = []
               
-              //console.log(that.$store.state.points)
+              
+              console.log(that.$store.state.points)
 
             })
           } //for
