@@ -94,14 +94,14 @@ export default {
         this.p2.top = minH + Math.round(Math.random() * (maxH - minH)) + "px"
         this.p2.left = minW + Math.round(Math.random() * (maxW - minW)) + "px"
 
-        console.log("p1.top:" +  parseInt(this.p1.top)*2  + "  p1.left" + parseInt(this.p1.left)*2 + " p2.top:" +  parseInt(this.p2.top)*2  + "  p2.left" + parseInt(this.p2.left)*2)
+        //console.log("p1.top:" +  parseInt(this.p1.top)*2  + "  p1.left" + parseInt(this.p1.left)*2 + " p2.top:" +  parseInt(this.p2.top)*2  + "  p2.left" + parseInt(this.p2.left)*2)
         
       },//随机摆放点位置
       strokePoints:function(step){
         const c = this.$refs.myCanvas
         const context = c.getContext("2d")
         let configShowLineLast = 0
-        let colors = ["#000000","#666666","#CCCCCC"]
+        let colors = ["#666666","#999999","#cccccc"]
         if(step){
           configShowLineLast = parseInt(this.$store.state.configShowLineLast)
         }
@@ -154,31 +154,96 @@ export default {
         })
       },//重载组件
       passedCheck(){
-        
-        for (const key in this.$store.state.points[0]) {
 
-          //比对第一个点
-          let p1xS = parseInt(this.p1.top)*2
-          let p1xE = parseInt(this.p1.top)*2 + this.$store.state.pointSize
+        let a1 = parseInt(this.p1.left)*2 + this.$store.state.pointSize/2
+        let b1 = parseInt(this.p1.top)*2 + this.$store.state.pointSize/2
 
-          let p1yS = parseInt(this.p1.left)*2
-          let p1yE = parseInt(this.p1.left)*2 + this.$store.state.pointSize
+        let a2 = parseInt(this.p2.left)*2 + this.$store.state.pointSize/2
+        let b2 = parseInt(this.p2.top)*2 + this.$store.state.pointSize/2
 
-          //比对第二个点
-          let p2xS = parseInt(this.p2.top)*2
-          let p2xE = parseInt(this.p2.top)*2 + this.$store.state.pointSize
+        let passed = false
 
-          let p2yS = parseInt(this.p2.left)*2
-          let p2yE = parseInt(this.p2.left)*2 + this.$store.state.pointSize
+        let x0 = this.points[0].x
+        let y0 = this.points[0].y
 
+        let xx = this.points[this.points.length-1].x
+        let yy = this.points[this.points.length-1].y
 
-          console.log(this.$store.state.points[0][key].x)
+        //增加容差
+        if(x0 < xx){
+          x0 = x0 - this.$store.state.pointSize * 2
+          xx = xx + this.$store.state.pointSize * 2
+        }else{
+          x0 = x0 + this.$store.state.pointSize * 2
+          xx = xx - this.$store.state.pointSize * 2
         }
+        if(y0 < yy){
+          y0 = y0 - this.$store.state.pointSize * 2
+          yy = yy + this.$store.state.pointSize * 2
+        }else{
+          y0 = y0 + this.$store.state.pointSize * 2
+          yy = yy - this.$store.state.pointSize * 2
+        }
+
+        //比对第一个点
+        if(((x0 <= a1 && a1 <= xx) || (xx <= a1 && a1 <= x0)) && ((y0 <= b1 && b1 <= yy) || (yy <= b1 && b1 <= y0))){
+          if(((x0 <= a2 && a2 <= xx) || (xx <= a2 && a2 <= x0)) && ((y0 <= b2 && b2 <= yy) || (yy <= b2 && b2 <= y0))){
+            
+            for (const key in this.points) {
+            
+              if(0 == key) continue
+
+              let x1 = this.points[key-1].x
+              let y1 = this.points[key-1].y
+
+              let x2 = this.points[key].x
+              let y2 = this.points[key].y
+              
+              let s1 = a1 - x1
+              let s2 = x1 - x2
+              let t1 = b1 - y1
+              let t2 = y1 - y2
+
+              let p1 = false
+              let p2 = false
+              
+              //比对第一个点
+              console.log("a1:" + a1 + " b1:" + b1 + " x1:" + x1+ " y1:" + y1+ " x2:" + x2+ " y2:" + y2)
+              console.log("s1/s2==t1/t2:"+s1/s2+"==" + t1/t2)
+              console.log("p1:" + p1)
+
+              //比对第二个点
+
+              if(p1 && p2) {
+                passed = true
+                break
+              }
+
+            }//for
+
+          }else{
+            console.log("p2坐标：" + a2 + " " + b2)
+            console.log("矩阵 x0:"+x0+" xx:"+xx+" y0:"+y0+" yy:"+yy)  
+          }//if
+        }else{
+            console.log("p1坐标：" + a1 + " " + b1)
+            console.log("矩阵 x0:"+x0+" xx:"+xx+" y0:"+y0+" yy:"+yy)  
+          }//if
+
+        
 
         //重置点位置，擦出线
         this.posePoint()
-      },//判断坐标是否穿过
+        return passed
 
+      },//判断坐标是否穿过
+      getRandomColor(){
+        let r = parseInt(Math.random() * 256)
+        let g = parseInt(Math.random() * 256)
+        let b = parseInt(Math.random() * 256)
+
+        return `rgba(${r},${g},${b},1)`
+      },//获得随机颜色
 
 
     },
@@ -377,7 +442,7 @@ export default {
               that.points = []
               
               
-              console.log(that.$store.state.points)
+              //console.log(that.$store.state.points)
 
             })
           } //for
