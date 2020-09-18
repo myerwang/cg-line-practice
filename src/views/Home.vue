@@ -6,7 +6,10 @@
     <div v-show="development" class="touches" v-html="this.touches"></div>
     <div class="panel">
       <div class="basic silent"><span :style="{fontSize:showSumFontSize}">{{showSum}}</span></div>
-      <div class="basic silent"><span :style="{fontSize:showSumFontSizePassed}">{{this.$store.state.passed}}</span></div>
+      <div class="basic silent green"><span :style="{fontSize:showSumFontSizePassed}">{{this.$store.state.passed}}</span></div>
+      <div class="basic silent"><span style="fontSize:30px">{{showPercentage}}</span></div>
+      <div class="basic silent"><span :style="{fontSize:showComboCss}">{{showCombo}}</span></div>
+      <div class="basic silent"><span :style="{fontSize:showComboMaxCss}">{{this.$store.state.comboMax}}</span></div>
       <div class="basic clear" @click="clearCanvasAndPoints"><span class="icon iconfont iconxiangpica"></span></div>
     </div>
     <canvas ref="myCanvas" v-if="hackReset" v-plug>Sorry, your browser is too old for this demo.</canvas>
@@ -36,6 +39,7 @@ export default {
         },//p2点style
         isFullscreen: false,
         hackReset:true,         //重载组件
+        combo:false,
 
 
 
@@ -61,6 +65,28 @@ export default {
         if(this.$store.state.passed >= 100) return "44px"
         return "60px"
       },
+      showComboMaxCss(){
+        if(this.$store.state.comboMax >= 100000) return "14px"
+        if(this.$store.state.comboMax >= 10000) return "25px"
+        if(this.$store.state.comboMax >= 1000) return "30px"
+        if(this.$store.state.comboMax >= 100) return "44px"
+        return "60px"
+      },
+      showComboCss(){
+        if(this.$store.state.combo >= 10000) return "15px"
+        if(this.$store.state.combo >= 1000) return "20px"
+        if(this.$store.state.combo >= 100) return "34px"
+        return "50px"
+      },
+      showCombo(){
+        if(this.$store.state.combo > 0) return "+"+this.$store.state.combo
+        return "0"
+      },
+      showPercentage(){
+        if(parseInt(this.$store.state.passed/this.$store.state.points.length*100)) return parseInt(this.$store.state.passed/this.$store.state.points.length*100) + "%"
+        return "0"
+      },
+
     },
     methods: {
       clearCanvas:function(){  
@@ -94,6 +120,11 @@ export default {
         this.p2.top = minH + Math.round(Math.random() * (maxH - minH)) + "px"
         this.p2.left = minW + Math.round(Math.random() * (maxW - minW)) + "px"
 
+        this.p1.width = this.$store.state.pointSize + "px"
+        this.p1.height = this.$store.state.pointSize + "px"
+        this.p2.width = this.$store.state.pointSize + "px"
+        this.p2.height = this.$store.state.pointSize + "px"
+
         //console.log("p1.top:" +  parseInt(this.p1.top)*2  + "  p1.left" + parseInt(this.p1.left)*2 + " p2.top:" +  parseInt(this.p2.top)*2  + "  p2.left" + parseInt(this.p2.left)*2)
         
       },//随机摆放点位置
@@ -111,6 +142,7 @@ export default {
 
             if(configShowLineLast <= key) break
             let color = colors[key]
+            if (this.$store.state.combo >= 3) color = this.getRandomColor()
 
             for (const keySon in element) {
               if (element.hasOwnProperty(keySon)) {
@@ -186,51 +218,70 @@ export default {
         }
 
         //比对第一个点
-        if(((x0 <= a1 && a1 <= xx) || (xx <= a1 && a1 <= x0)) && ((y0 <= b1 && b1 <= yy) || (yy <= b1 && b1 <= y0))){
-          if(((x0 <= a2 && a2 <= xx) || (xx <= a2 && a2 <= x0)) && ((y0 <= b2 && b2 <= yy) || (yy <= b2 && b2 <= y0))){
-            
-            for (const key in this.points) {
-            
-              if(0 == key) continue
-
-              let x1 = this.points[key-1].x
-              let y1 = this.points[key-1].y
-
-              let x2 = this.points[key].x
-              let y2 = this.points[key].y
+        if(Math.min(x0,xx) <= a1 && a1 <= Math.max(x0,xx) && Math.min(y0,yy) <= b1 && b1 <= Math.max(y0,yy)){
+          if(Math.min(x0,xx) <= a2 && a2 <= Math.max(x0,xx) && Math.min(y0,yy) <= b2 && b2 <= Math.max(y0,yy)){
+            //console.log("!!!!!!!!!!!!!!!!!!!!!!!" + Math.random() * 256)
               
-              let s1 = a1 - x1
-              let s2 = x1 - x2
-              let t1 = b1 - y1
-              let t2 = y1 - y2
+            //删除容差
+            x0 = this.points[0].x
+            y0 = this.points[0].y
+            xx = this.points[this.points.length-1].x
+            yy = this.points[this.points.length-1].y
 
-              let p1 = false
-              let p2 = false
-              
-              //比对第一个点
-              console.log("a1:" + a1 + " b1:" + b1 + " x1:" + x1+ " y1:" + y1+ " x2:" + x2+ " y2:" + y2)
-              console.log("s1/s2==t1/t2:"+s1/s2+"==" + t1/t2)
-              console.log("p1:" + p1)
+            let p1 = {x:x0,y:y0}
+            let p2 = {x:xx,y:yy}
+            
+            //两条线的向量
+            let a = p1.y - p2.y
+            let b = p1.x - p2.x
+            let len = Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2))
+            a /= len
+            b /= len
+            b = b + 1 - a
+            let k = {x:1,y:b} //向量 k
 
-              //比对第二个点
+            //点线的向量 1
+            a = b1 - p2.y
+            b = a1 - p2.x
+            len = Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2))
+            a /= len
+            b /= len
+            b = b + 1 - a
+            let j = {x:1,y:b} //向量 k
 
-              if(p1 && p2) {
-                passed = true
-                break
+            //点线的向量 2
+            a = b2 - p2.y
+            b = a2 - p2.x
+            len = Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2))
+            a /= len
+            b /= len
+            b = b + 1 - a
+            let l = {x:1,y:b} //向量 k
+
+            //x位置固定比对y位置
+            let z1 = k.y - j.y
+            let z2 = k.y - l.y
+            
+            // console.log("线的向量k" + k.x + " " + k.y)
+            // console.log("点线的向量j" + j.x + " " + j.y)
+            
+
+            if(Math.abs(z1 * 100) <= this.$store.state.pointSize/this.$store.state.configPassedCheckLimit && Math.abs(z2 * 100 ) <= this.$store.state.pointSize/this.$store.state.configPassedCheckLimit) {
+              passed = true
+              if(this.combo){
+                this.$store.commit('addCombo')
               }
+              this.combo = true
+            }else{
+              this.combo = false
+              this.$store.commit('clearCombo')
+            }
 
-            }//for
+            // console.log("点线的点乘1:" + (z1 * 100) + " " + passed)
+            // console.log("点线的点乘2:" + (z2 * 100) + " " + passed)
 
-          }else{
-            console.log("p2坐标：" + a2 + " " + b2)
-            console.log("矩阵 x0:"+x0+" xx:"+xx+" y0:"+y0+" yy:"+yy)  
           }//if
-        }else{
-            console.log("p1坐标：" + a1 + " " + b1)
-            console.log("矩阵 x0:"+x0+" xx:"+xx+" y0:"+y0+" yy:"+yy)  
-          }//if
-
-        
+        }//if
 
         //重置点位置，擦出线
         this.posePoint()
@@ -294,7 +345,7 @@ export default {
 
           for (const ev of ["touchstart", "mousedown"]) {
 
-            if("development" != process.env.NODE_ENV && "mousedown" == ev) continue
+            if("mousedown" == ev) continue
             
             el.addEventListener(ev, function (e) {
 
@@ -330,7 +381,7 @@ export default {
 
           for (const ev of ['touchmove', 'mousemove']) {
             
-            if("development" != process.env.NODE_ENV && "mousedown" == ev) continue
+            if("mousemove" == ev) continue
             
             el.addEventListener(ev, function (e) {
               if (!isMousedown) return
@@ -395,7 +446,7 @@ export default {
 
           for (const ev of ['touchend', 'touchleave', 'mouseup']) {
             
-            if("development" != process.env.NODE_ENV && "mousedown" == ev) continue
+            if("mouseup" == ev) continue
             
             el.addEventListener(ev, function (e) {
               let pressure = 0.1;
@@ -433,7 +484,10 @@ export default {
               lineWidth = 0
 
               //判别准确性
-              that.passedCheck()
+              if(that.passedCheck()){
+                that.$store.commit('addPassed')
+              }
+
               //清除画布
               that.clearCanvas()
               //保存点集合
@@ -524,6 +578,11 @@ canvas {
     span{
       font-size: 60px;
       color: #4c4c4c;
+    }
+  }
+  .green{
+    span{
+      color: #79ff77;
     }
   }
   .match{

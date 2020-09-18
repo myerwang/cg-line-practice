@@ -26,6 +26,7 @@
   z-index: 100;
   width: 100%;
   user-select: none;
+  touch-action:none;
   a {
     font-weight: bold;
     color: #2c3e50;

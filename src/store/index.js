@@ -8,8 +8,11 @@ export default new Vuex.Store({
   state: {
     points:[],
     passed:0,                           //及格线
+    combo:0,                            //连击
+    comboMax:0,                         //连击
     pointSize:30,                       //点大小
     configShowLineLast:3,               //配置项，保留最后三条线
+    configPassedCheckLimit:3,          //验证点线穿过容差 
 
 
   },
@@ -23,6 +26,22 @@ export default new Vuex.Store({
     clearLineData(state){
       state.points = []
       state.passed = 0
+      state.combo = 0
+    },
+    //及格线加1
+    addPassed(state){
+      state.passed++
+    },
+    //combo加1
+    addCombo(state){
+      state.combo++
+      if(state.combo >= state.comboMax){
+        state.comboMax = state.combo
+      }
+    },
+    //combo加1
+    clearCombo(state){
+      state.combo = 0
     }
   },
   // actions  调用方式 this.$store.dispatch('clearLineData',data)
