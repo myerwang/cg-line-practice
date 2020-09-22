@@ -345,9 +345,12 @@ export default {
 
           for (const ev of ["touchstart", "mousedown"]) {
 
-            if("mousedown" == ev) continue
+            if(!that.development && "mousedown" == ev) continue
             
             el.addEventListener(ev, function (e) {
+              
+              e.preventDefault()
+              if(!that.development && e.touches.touchType !== "pencil") return
 
               let pressure = 0.1;
               let x, y;
@@ -381,11 +384,13 @@ export default {
 
           for (const ev of ['touchmove', 'mousemove']) {
             
-            if("mousemove" == ev) continue
+            if(!that.development && "mousemove" == ev) continue
             
             el.addEventListener(ev, function (e) {
               if (!isMousedown) return
               e.preventDefault()
+
+              if(!that.development && e.touches.touchType !== "pencil") return
 
               let pressure = 0.1
               let x, y
@@ -446,9 +451,13 @@ export default {
 
           for (const ev of ['touchend', 'touchleave', 'mouseup']) {
             
-            if("mouseup" == ev) continue
+            if(!that.development && "mouseup" == ev) continue
             
             el.addEventListener(ev, function (e) {
+
+              e.preventDefault()
+              if(!that.development && e.touches.touchType !== "pencil") return false
+
               let pressure = 0.1;
               let x, y;
 
@@ -524,6 +533,7 @@ body {
   font-family: sans-serif;
   font-size: 13px;
   box-sizing: border-box;
+  overflow: hidden;
 }
 canvas {
   position: absolute;
