@@ -349,7 +349,8 @@ export default {
             
             el.addEventListener(ev, function (e) {
              
-             
+console.log("touchstart")
+
               const touch = e.touches ? e.touches[0] : null
               if(!that.development && touch.touchType !== "stylus") return
 
@@ -384,13 +385,13 @@ export default {
           } //for
 
           for (const ev of ['touchmove', 'mousemove']) {
-            
+          
             if(!that.development && "mousemove" == ev) continue
             
             el.addEventListener(ev, function (e) {
               if (!isMousedown) return
               e.preventDefault()
-
+console.log("touchmove")  
               const touch = e.touches ? e.touches[0] : null
               if(!that.development && touch.touchType !== "stylus") return
 
@@ -450,11 +451,11 @@ export default {
           } //for
 
           for (const ev of ['touchend', 'touchleave', 'mouseup']) {
-            
+           
             if(!that.development && "mouseup" == ev) continue
             
             el.addEventListener(ev, function (e) {
-
+console.log("touchend")  
               const touch = e.touches ? e.touches[0] : null
               if(!that.development && touch.touchType !== "stylus") return
 
@@ -490,20 +491,20 @@ export default {
               //console.log(that.points)
               //console.log("!!!!!!!!!!!!!!!!!!!!!!!")
 
-              lineWidth = 0
-
-              //判别准确性
-              if(that.passedCheck()){
-                that.$store.commit('addPassed')
+              //过滤误触
+              if(that.points.length >= 10){
+                //判别准确性
+                if(that.passedCheck()){
+                  that.$store.commit('addPassed')
+                }
+                //清除画布
+                that.clearCanvas()
+                //保存点集合
+                that.$store.commit('addLineData',that.points)
               }
 
-              //清除画布
-              that.clearCanvas()
-              //保存点集合
-              that.$store.commit('addLineData',that.points)
               //删除本地点集合
               that.points = []
-              
               
               //console.log(that.$store.state.points)
 
