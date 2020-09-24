@@ -348,9 +348,10 @@ export default {
             if(!that.development && "mousedown" == ev) continue
             
             el.addEventListener(ev, function (e) {
-              
-              e.preventDefault()
-              if(!that.development && e.touches.touchType !== "pencil") return
+             
+             
+              const touch = e.touches ? e.touches[0] : null
+              if(!that.development && touch.touchType !== "stylus") return
 
               let pressure = 0.1;
               let x, y;
@@ -390,7 +391,8 @@ export default {
               if (!isMousedown) return
               e.preventDefault()
 
-              if(!that.development && e.touches.touchType !== "pencil") return
+              const touch = e.touches ? e.touches[0] : null
+              if(!that.development && touch.touchType !== "stylus") return
 
               let pressure = 0.1
               let x, y
@@ -429,8 +431,6 @@ export default {
                 context.moveTo(xc, yc)
               }
 
-              const touch = e.touches ? e.touches[0] : null
-
               requestIdleCallback(() => {
                 vnode.context.pressure = pressure
                 if(touch){
@@ -455,8 +455,8 @@ export default {
             
             el.addEventListener(ev, function (e) {
 
-              e.preventDefault()
-              if(!that.development && e.touches.touchType !== "pencil") return false
+              const touch = e.touches ? e.touches[0] : null
+              if(!that.development && touch.touchType !== "stylus") return
 
               let pressure = 0.1;
               let x, y;
