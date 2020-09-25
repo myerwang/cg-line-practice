@@ -283,7 +283,7 @@ export default {
           }//if
         }//if
 
-        //重置点位置，擦出线
+        //重置点位置
         this.posePoint()
         return passed
 
@@ -309,7 +309,7 @@ export default {
       }else{
         this.development = false
       }
-
+//this.development = false
       //开始拉伸窗口事件
       const that = this;
       window.onresize = () => {
@@ -334,7 +334,8 @@ export default {
           const context = el.getContext('2d')
           const that = vnode.context
           let lineWidth = 0
-          let isMousedown = false
+          let isMousedown = false //判断笔迹合法性
+          let canPencil = false    //判断是否在apple pencil可用环境
 
           el.width = window.innerWidth * 2
           el.height = window.innerHeight * 2
@@ -348,12 +349,8 @@ export default {
             if(!that.development && "mousedown" == ev) continue
             
             el.addEventListener(ev, function (e) {
-             
+              e.preventDefault()
 console.log("touchstart")
-
-              const touch = e.touches ? e.touches[0] : null
-              if(!that.development && touch.touchType !== "stylus") return
-
               let pressure = 0.1;
               let x, y;
               if (e.touches && e.touches[0] && typeof e.touches[0]["force"] !== "undefined") {
@@ -385,15 +382,23 @@ console.log("touchstart")
           } //for
 
           for (const ev of ['touchmove', 'mousemove']) {
-          
+
             if(!that.development && "mousemove" == ev) continue
-            
+
             el.addEventListener(ev, function (e) {
               if (!isMousedown) return
               e.preventDefault()
-console.log("touchmove")  
+
               const touch = e.touches ? e.touches[0] : null
-              if(!that.development && touch.touchType !== "stylus") return
+
+              if(touch && !that.development && touch.touchType !== undefined){
+                canPencil = true
+                if(touch.touchType !== "stylus"){
+                  that.points = []
+                  isMousedown = false
+                  return
+                }
+              }
 
               let pressure = 0.1
               let x, y
@@ -436,6 +441,7 @@ console.log("touchmove")
                 vnode.context.pressure = pressure
                 if(touch){
                   vnode.context.touches = `
+                    development = ${that.development}<br/>
                     touchType = ${touch.touchType} ${touch.touchType === 'direct' ? '👆' : '✍️'} <br/>
                     radiusX = ${touch.radiusX} <br/>
                     radiusY = ${touch.radiusY} <br/>
@@ -451,13 +457,13 @@ console.log("touchmove")
           } //for
 
           for (const ev of ['touchend', 'touchleave', 'mouseup']) {
-           
+            
             if(!that.development && "mouseup" == ev) continue
             
             el.addEventListener(ev, function (e) {
-console.log("touchend")  
-              const touch = e.touches ? e.touches[0] : null
-              if(!that.development && touch.touchType !== "stylus") return
+
+              if (canPencil && !isMousedown) return
+              e.preventDefault()
 
               let pressure = 0.1;
               let x, y;
@@ -492,7 +498,7 @@ console.log("touchend")
               //console.log("!!!!!!!!!!!!!!!!!!!!!!!")
 
               //过滤误触
-              if(that.points.length >= 10){
+              if (that.points.length >= 10) {
                 //判别准确性
                 if(that.passedCheck()){
                   that.$store.commit('addPassed')
